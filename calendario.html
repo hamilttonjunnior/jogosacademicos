@@ -430,7 +430,6 @@
             <div class="stat-card total"><h3>Total Jogos</h3><p id="statTotal">0</p></div>
             <div class="stat-card casa"><h3>Em Casa</h3><p id="statCasa">0</p></div>
             <div class="stat-card fora"><h3>Fora</h3><p id="statFora">0</p></div>
-            <div class="stat-card fim"><h3>Terminados</h3><p id="statFim">0</p></div>
         </div>
 
         <div class="filter-grid">
@@ -566,7 +565,7 @@
         window.history.replaceState({}, '', currentUrl);
 
         lWeb.innerHTML = ''; lMob.innerHTML = ''; hWeb.innerHTML = ''; hMob.innerHTML = '';
-        let cC = 0, cF = 0, cFin = 0;
+        let cC = 0, cF = 0;
 
         jogosAtuais.forEach(j => {
             if(selT.length > 0 && !selT.includes(j.treinador)) return; 
@@ -613,8 +612,6 @@
                                   <div class="info-item" style="grid-column: span 2; display:block; margin-top:5px;">🏠 Pav: ${j.pavilhao} ${j.mapsLink ? `<br><a href="${j.mapsLink}" target="_blank" class="maps-btn">📍 Rota Google Maps</a>` : ''}</div>`;
                 lMob.appendChild(card);
             } else {
-                cFin++;
-                
                 // Histórico Web
                 const tr = document.createElement('tr'); tr.className = 'row-finalizado';
                 tr.innerHTML = `<td style="background:${j.cor}; width:4px; max-width:4px; min-width:4px; opacity:0.5; padding:0; margin:0;"></td>
@@ -637,10 +634,9 @@
             }
         });
         
-        document.getElementById('statTotal').innerText = cC+cF+cFin; 
+        document.getElementById('statTotal').innerText = cC+cF; 
         document.getElementById('statCasa').innerText = cC; 
         document.getElementById('statFora').innerText = cF; 
-        document.getElementById('statFim').innerText = cFin;
     };
 
     window.onclick = (e) => { if (!e.target.closest('.multiselect-wrap')) { document.querySelectorAll('.multiselect-dropdown').forEach(el => el.classList.remove('show')); } };
