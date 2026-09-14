@@ -640,6 +640,13 @@
         .resultado-tag { font-weight: 900; color: #000000; font-size: 15px; }
         .parciais-tag { font-size: 12px; color: var(--gray-dark); }
 
+        /* Destaque para jogador substituto em quadra */
+        .substituto-em-campo {
+            background-color: #e6f4ea !important;
+            border: 1px solid #34a853 !important;
+            font-weight: bold;
+        }
+
         /* Responsividade */
         @media screen and (min-width: 1025px) { 
             .table-wrapper { display: block !important; } 
@@ -1001,6 +1008,127 @@
     
     window.limpar = () => { editId = null; ['data','hora','competicao','jornada','numJogo','adversario','setPro','setContra','parciais'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; }); document.getElementById('btnSalvar').innerText = "Agendar Jogo"; document.getElementById('btnSalvar').classList.remove("btn-atualizar"); document.getElementById('btnCancelar').style.display = "none"; document.getElementById('formAgendamento').classList.remove('active'); };
     window.onclick = (e) => { if (!e.target.closest('.multiselect-wrap')) { document.querySelectorAll('.multiselect-dropdown').forEach(el => el.classList.remove('show')); } };
+
+    // ==========================================
+    // MÓDULO DE REGRAS DE SUBSTITUIÇÃO DO VOLEIBOL
+    // ==========================================
+    
+    // Armazena a estrutura do Set atual
+    window.estadoSubstituicoes = {
+        quadra: [],       // Lista de atletas em quadra ex: [{id: 1, nome: "Jogador A", ehReserva: false, substituiuId: null}]
+        banco: [],        // Lista de atletas no banco
+        paresTroca: {},   // Mapeamento { idReserva: idTitular }
+        historicoTrocas: [] // Atletas que já queimaram sua troca no set
+    };
+
+    /**
+     * Inicia as substituições permitidas para um jogador específico
+     * @param {Object} jogadorClicado Objeto do jogador em quadra
+     */
+    window.abrirModalSubstituicao = (jogadorClicado) => {
+        const { quadra, banco, paresTroca, historicoTrocas } = window.estadoSubstituicoes;
+        let opcoesHtml = "";
+
+        // CASO 1: O jogador em quadra é um RESERVA que entrou anteriormente
+        if (jogadorClicado.ehReserva && paresTroca[jogadorClicado.id]) {
+            const titularOriginalId = paresTroca[jogadorClicado.id];
+            const titularOriginal = banco.find(j => j.id === titularOriginalId);
+
+            if (titularOriginal) {
+                opcoesHtml = `
+                    <p style="font-size: 13px; color: #444;">Este atleta é um substituto. Regra FIVB: Apenas o titular original pode reingressar.</p>
+                    <label>Titular para Retornar:</label>
+                    <select id="selectSubstituto">
+                        <option value="${titularOriginal.id}">${titularOriginal.nome} (Titular Original)</option>
+                    </select>
+                `;
+            }
+        } 
+        // CASO 2: O jogador em quadra é um TITULAR original
+        else {
+            // Regra FIVB: Apenas reservas do banco que ainda não foram queimados no set
+            const reservasElegiveis = banco.filter(j => !historicoTrocas.includes(j.id));
+
+            if (reservasElegiveis.length === 0) {
+                opcoesHtml = `<p style="font-size: 13px; color: var(--error);">Não há reservas elegíveis disponíveis para este set.</p>`;
+            } else {
+                opcoesHtml = `
+                    <label>Selecione o Reserva para Entrar:</label>
+                    <select id="selectSubstituto">
+                        ${reservasElegiveis.map(r => `<option value="${r.id}">${r.nome}</option>`).join('')}
+                    </select>
+                `;
+            }
+        }
+
+        window.openCustomModal(`Substituir: ${jogadorClicado.nome}`, opcoesHtml, () => {
+            const select = document.getElementById('selectSubstituto');
+            if (!select) {
+                window.closeCustomModal();
+                return;
+            }
+            const novoEntranteId = parseInt(select.value);
+            window.executarSubstituicao(jogadorClicado.id, novoEntranteId);
+            window.closeCustomModal();
+        });
+    };
+
+    /**
+     * Executa a troca de posições mantendo a regra de integridade do par
+     */
+    window.executarSubstituicao = (saindoId, entrandoId) => {
+        let { quadra, banco, paresTroca, historicoTrocas } = window.estadoSubstituicoes;
+
+        const idxSaindo = quadra.findIndex(j => j.id === saindoId);
+        const idxEntrando = banco.findIndex(j => j.id === entrandoId);
+
+        if (idxSaindo === -1 || idxEntrando === -1) return;
+
+        const jogadorSaindo = quadra[idxSaindo];
+        const jogadorEntrando = banco[idxEntrando];
+
+        // Se quem está saindo é um RESERVA, o TITULAR está regressando
+        if (jogadorSaindo.ehReserva) {
+            jogadorEntrando.ehReserva = false;
+            
+            // Remove o par da memória pois a troca dessa vaga fechou para o set
+            delete paresTroca[jogadorSaindo.id];
+            
+            // Marca o reserva como "utilizado" no set para que não volte a entrar
+            historicoTrocas.push(jogadorSaindo.id);
+        } 
+        // Se quem está saindo é um TITULAR, um RESERVA está entrando
+        else {
+            jogadorEntrando.ehReserva = true;
+            // Registra a dependência vinculada: ReservaId -> TitularId
+            paresTroca[jogadorEntrando.id] = jogadorSaindo.id;
+        }
+
+        // Atualiza as listas de Quadra e Banco
+        quadra[idxSaindo] = jogadorEntrando;
+        banco[idxEntrando] = jogadorSaindo;
+
+        // Redesenha a interface visual da quadra
+        window.renderizarQuadraSubstituicoes();
+    };
+
+    /**
+     * Renderiza o painel de jogadores e aplica o destaque visual (cor) nos substitutos
+     */
+    window.renderizarQuadraSubstituicoes = () => {
+        const containerQuadra = document.getElementById('painelQuadraVisual');
+        if (!containerQuadra) return;
+
+        containerQuadra.innerHTML = window.estadoSubstituicoes.quadra.map(j => {
+            // Se for um reserva em quadra, ganha a classe de cor alterada (.substituto-em-campo)
+            const classeCor = j.ehReserva ? 'substituto-em-campo' : 'btn-light';
+            return `
+                <button class="${classeCor}" onclick='abrirModalSubstituicao(${JSON.stringify(j)})' style="padding: 10px; margin: 5px; border-radius: 6px;">
+                    ${j.nome} ${j.ehReserva ? '🔄 (Substituto)' : ''}
+                </button>
+            `;
+        }).join('');
+    };
 </script>
 </body>
 </html>
