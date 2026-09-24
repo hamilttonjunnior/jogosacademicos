@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FC Académicos - Painel de Escore</title>
+    <title>FC Académicos - Placar & Escores</title>
     <link rel="shortcut icon" type="image/x-icon" href="FCA.ico">
     <link rel="apple-touch-icon" href="academicos.png">
     <link rel="icon" type="image/png" sizes="192x192" href="academicos.png">
@@ -12,6 +12,7 @@
             --primary: #000000; 
             --accent: #222222; 
             --bg: #f8f9fa; 
+            --gray-light: #f1f3f5;
             --gray-border: #e2e8f0;
             --gray-dark: #64748b;
         }
@@ -50,21 +51,68 @@
             padding-bottom: 20px; 
         }
         .header-logo { max-height: 40px; margin-right: 15px; }
-        header h2 { font-weight: 800; letter-spacing: -0.5px; margin: 0; font-size: 1.2rem; }
+        header h2 { font-weight: 800; letter-spacing: -0.5px; margin: 0; font-size: 1.1rem; color: var(--primary); }
+
+        /* Filtros */
+        .filter-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 16px; 
+            background: var(--bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid var(--gray-border); 
+            margin-bottom: 25px; 
+        }
+        .field { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        }
+        .field label { 
+            font-size: 10px; 
+            font-weight: 800; 
+            color: #000000; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input, select { 
+            padding: 10px 12px; 
+            border: 1px solid var(--gray-border); 
+            border-radius: 8px; 
+            font-size: 13px; 
+            background: #ffffff; 
+            color: #000000;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus, select:focus { border-color: #000000; }
+
+        .btn-dark {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            height: 41px;
+            align-self: flex-end;
+        }
+        .btn-dark:hover { background: var(--primary); }
 
         .secao-titulo {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin: 25px 0 15px;
             color: #000000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        /* CARD DE ESCORE / PLACAR (ESTILO REFERÊNCIA) */
+        /* CARDS DE ESCORE (Padrão de Cores Preto/Cinza/Antracite do Site) */
         .escore-card {
             background: #ffffff;
             border: 1px solid var(--gray-border);
@@ -72,10 +120,6 @@
             padding: 16px 20px;
             margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            transition: transform 0.2s;
-        }
-        .escore-card:hover {
-            transform: translateY(-2px);
         }
         .escore-topo-info {
             text-align: center;
@@ -93,8 +137,8 @@
             color: #111;
             margin-bottom: 10px;
         }
-        .escore-barra-verde {
-            background: #0e3b21; /* Verde escuro padrão da identidade */
+        .escore-barra-preta {
+            background: #111111; /* Cor primária de destaque do seu tema */
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -164,6 +208,10 @@
             border-radius: 8px;
             border: 1px dashed var(--gray-border);
         }
+        .load-more-container {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -176,17 +224,32 @@
                 <h2>FC Os Académicos - Placar & Escores</h2>
             </div>
             <div>
-                <span style="font-size: 12px; color: var(--gray-dark); font-weight: bold;">⚡ Atualização Automática</span>
+                <span style="font-size: 12px; color: var(--gray-dark); font-weight: bold;">⚡ Resultados & Próximos</span>
             </div>
         </header>
 
-        <!-- SEÇÃO: JOGOS FUTUROS (AGUARDANDO) -->
-        <div class="secao-titulo">📅 Próximos Jogos (Aguardando)</div>
-        <div id="listaFuturos"></div>
+        <!-- FILTROS DE DATAS E TURNO -->
+        <div class="filter-grid">
+            <div class="field"><label>📅 Data Inicial</label><input type="date" id="filtroDataInicio" onchange="renderizarPlacares()"></div>
+            <div class="field"><label>📅 Data Final</label><input type="date" id="filtroDataFim" onchange="renderizarPlacares()"></div>
+            <div class="field"><label>⏰ Turno / Período</label>
+                <select id="filtroTurno" onchange="renderizarPlacares()">
+                    <option value="">Todos os turnos</option>
+                    <option value="manha">Manhã (antes das 12h)</option>
+                    <option value="tarde">Tarde (12h às 18h)</option>
+                    <option value="noite">Noite (após 18h)</option>
+                </select>
+            </div>
+            <button class="btn-dark" onclick="limparFiltros()">Limpar Filtros</button>
+        </div>
 
-        <!-- SEÇÃO: ÚLTIMOS RESULTADOS (10 DIAS PARA TRÁS) -->
-        <div class="secao-titulo" style="margin-top: 35px;">📜 Últimos Resultados (Últimos 10 Dias)</div>
-        <div id="listaHistoricoRecente"></div>
+        <!-- LISTA UNIFICADA DE PLACARES (PASSADOS E FUTUROS) -->
+        <div id="listaPlacares"></div>
+
+        <!-- BOTÃO CARREGAR MAIS -->
+        <div class="load-more-container" id="containerBtnMais" style="display:none;">
+            <button class="btn-dark" onclick="carregarMaisJogos()" style="width: 100%; align-self: center;">Carregar Mais Jogos (+5)</option>
+        </div>
     </div>
 </div>
 
@@ -199,7 +262,9 @@
     const db = getFirestore(app); 
     const jogosCol = collection(db, "jogos");
 
-    // Dicionário de Logos dos Clubes
+    let todosOsJogos = [];
+    let limiteExibicao = 10; // Começa mostrando 10 (5 para trás e 5 para frente)
+
     const logosClubes = {
         "Académicos": "academicos.png",
         "FC Os Académicos": "academicos.png",
@@ -215,75 +280,78 @@
     }
 
     onSnapshot(query(jogosCol, orderBy("data"), orderBy("hora")), (snapshot) => {
-        const listaFuturosEl = document.getElementById('listaFuturos');
-        const listaHistoricoEl = document.getElementById('listaHistoricoRecente');
+        todosOsJogos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Se for a primeira carga e não houver datas selecionadas, tenta posicionar o limite para mostrar os próximos e recentes
+        renderizarPlacares();
+    });
 
-        listaFuturosEl.innerHTML = '';
-        listaHistoricoEl.innerHTML = '';
+    window.renderizarPlacares = function() {
+        const container = document.getElementById('listaPlacares');
+        const btnMaisContainer = document.getElementById('containerBtnMais');
+        container.innerHTML = '';
 
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
+        const fInicio = document.getElementById('filtroDataInicio').value;
+        const fFim = document.getElementById('filtroDataFim').value;
+        const fTurno = document.getElementById('filtroTurno').value;
 
-        // Define a data limite de 10 dias atrás
-        const dezDiasAtras = new Date();
-        dezDiasAtras.setDate(hoje.getDate() - 10);
-        dezDiasAtras.setHours(0, 0, 0, 0);
+        const hojeStr = new Date().toISOString().split('T')[0];
 
-        let qtdFuturos = 0;
-        let qtdHistorico = 0;
+        // Filtra os jogos com base nos critérios de data e turno
+        let jogosFiltrados = todosOsJogos.filter(j => {
+            if (!j.data) return false;
+            if (fInicio && j.data < fInicio) return false;
+            if (fFim && j.data > fFim) return false;
 
-        snapshot.docs.forEach(doc => {
-            const j = doc.data();
-            if (!j.data) return;
+            if (fTurno && j.hora) {
+                const horaInt = parseInt(j.hora.split(':')[0]);
+                if (fTurno === 'manha' && horaInt >= 12) return false;
+                if (fTurno === 'tarde' && (horaInt < 12 || horaInt >= 18)) return false;
+                if (fTurno === 'noite' && horaInt < 18) return false;
+            }
+            return true;
+        });
 
-            const dataJogo = new Date(j.data + 'T00:00:00');
+        // Se o utilizador não aplicou filtro manual de data, separamos inteligentemente: 
+        // 5 jogos passados mais recentes + 5 jogos futuros seguintes.
+        if (!fInicio && !fFim) {
+            let passados = jogosFiltrados.filter(j => j.data < hojeStr || (j.data === hojeStr && j.finalizado));
+            let futuros = jogosFiltrados.filter(j => j.data >= hojeStr && !j.finalizado);
 
-            // Nomes e Logos configurados para Casa e Fora
+            // Ordena os passados do mais antigo para o mais recente ou vice-versa, e pega os últimos
+            passados.sort((a,b) => new Date(b.data) - new Date(new Date(a.data)));
+            let ultimosPassados = passados.slice(0, Math.min(5, passados.length)).reverse();
+
+            let proximosFuturos = futuros.slice(0, Math.max(5, limiteExibicao - ultimosPassados.length));
+
+            // Junta para exibição baseada no limite atual
+            jogosFiltrados = [...ultimosPassados, ...proximosFuturos];
+        }
+
+        const visiveis = jogosFiltrados.slice(0, limiteExibicao);
+
+        if (visiveis.length === 0) {
+            container.innerHTML = `<div class="sem-registos">Nenhum jogo encontrado com os filtros selecionados.</div>`;
+            btnMaisContainer.style.display = 'none';
+            return;
+        }
+
+        visiveis.forEach(j => {
             let timeCasaNome = j.casaFora === 'Casa' ? 'FC Académicos' : (j.adversario || 'Adversário');
             let timeForaNome = j.casaFora === 'Fora' ? 'FC Académicos' : (j.adversario || 'Adversário');
             let logoCasaImg = j.casaFora === 'Casa' ? obterLogo('Académicos') : obterLogo(j.adversario);
             let logoForaImg = j.casaFora === 'Fora' ? obterLogo('Académicos') : obterLogo(j.adversario);
-            let dtFormatada = j.data.split('-').reverse().join('/');
+            let dtFormatada = j.data ? j.data.split('-').reverse().join('/') : '';
 
-            // 1. JOGOS FUTUROS OU HOJE (Aguardando)
-            if (!j.finalizado && dataJogo >= hoje) {
-                qtdFuturos++;
-                const card = document.createElement('div');
-                card.className = 'escore-card';
-                card.innerHTML = `
-                    <div class="escore-topo-info">${j.escalao || 'Escalão'} • ${dtFormatada} às ${j.hora || ''}</div>
-                    <div class="escore-sub-text">${j.treinador || ''} ${j.competicao ? '• ' + j.competicao : ''}</div>
-                    <div class="escore-barra-verde">
-                        <div class="time-bloco">
-                            <img src="${logoCasaImg}" class="time-logo" onerror="this.style.display='none'">
-                            <span class="time-nome">${timeCasaNome}</span>
-                        </div>
-                        <div class="placar-box-pendente">
-                            EM BREVE
-                        </div>
-                        <div class="time-bloco direita">
-                            <span class="time-nome">${timeForaNome}</span>
-                            <img src="${logoForaImg}" class="time-logo" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                    <div class="escore-rodape">
-                        <span>📍 ${j.pavilhao || 'Local a definir'}</span>
-                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">${j.casaFora || ''}</span>
-                    </div>
-                `;
-                listaFuturosEl.appendChild(card);
-            }
+            const card = document.createElement('div');
+            card.className = 'escore-card';
 
-            // 2. JOGOS FINALIZADOS OU DOS ÚLTIMOS 10 DIAS PARA TRÁZ
-            if (j.finalizado || (dataJogo >= dezDiasAtras && dataJogo < hoje)) {
-                // Se o jogo já passou mas esqueceram de marcar como finalizado, exibe os dados salvos ou placeholder
-                qtdHistorico++;
-                const card = document.createElement('div');
-                card.className = 'escore-card';
+            if (j.finalizado || j.data < hojeStr) {
+                // CARD DE JOGO REALIZADO / COM RESULTADO
                 card.innerHTML = `
-                    <div class="escore-topo-info">${j.escalao || 'Escalão'}</div>
-                    <div class="escore-sub-text">${j.treinador || 'Treinador'} • ${dtFormatada}</div>
-                    <div class="escore-barra-verde">
+                    <div class="escore-topo-info">${j.escalao || 'Escalão'} • ${dtFormatada}</div>
+                    <div class="escore-sub-text">${j.treinador || 'Treinador'} ${j.competicao ? '• ' + j.competicao : ''}</div>
+                    <div class="escore-barra-preta">
                         <div class="time-bloco">
                             <img src="${logoCasaImg}" class="time-logo" onerror="this.style.display='none'">
                             <span class="time-nome">${timeCasaNome}</span>
@@ -304,17 +372,53 @@
                         </div>
                     </div>
                 `;
-                listaHistoricoEl.appendChild(card);
+            } else {
+                // CARD DE JOGO FUTURO (AGUARDANDO)
+                card.innerHTML = `
+                    <div class="escore-topo-info">${j.escalao || 'Escalão'} • ${dtFormatada} às ${j.hora || ''}</div>
+                    <div class="escore-sub-text">${j.treinador || ''} ${j.competicao ? '• ' + j.competicao : ''}</div>
+                    <div class="escore-barra-preta">
+                        <div class="time-bloco">
+                            <img src="${logoCasaImg}" class="time-logo" onerror="this.style.display='none'">
+                            <span class="time-nome">${timeCasaNome}</span>
+                        </div>
+                        <div class="placar-box-pendente">
+                            EM BREVE
+                        </div>
+                        <div class="time-bloco direita">
+                            <span class="time-nome">${timeForaNome}</span>
+                            <img src="${logoForaImg}" class="time-logo" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                    <div class="escore-rodape">
+                        <span>📍 ${j.pavilhao || 'Local a definir'}</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">${j.casaFora || ''}</span>
+                    </div>
+                `;
             }
+            container.appendChild(card);
         });
 
-        if (qtdFuturos === 0) {
-            listaFuturosEl.innerHTML = `<div class="sem-registos">Nenhum jogo futuro agendado no momento.</div>`;
+        // Mostra ou oculta o botão de carregar mais
+        if (visiveis.length < jogosFiltrados.length && (!fInicio && !fFim)) {
+            btnMaisContainer.style.display = 'block';
+        } else {
+            btnMaisContainer.style.display = 'none';
         }
-        if (qtdHistorico === 0) {
-            listaHistoricoEl.innerHTML = `<div class="sem-registos">Nenhum resultado registado nos últimos 10 dias.</div>`;
-        }
-    });
+    }
+
+    window.carregarMaisJogos = function() {
+        limiteExibicao += 5;
+        renderizarPlacares();
+    }
+
+    window.limparFiltros = function() {
+        document.getElementById('filtroDataInicio').value = '';
+        document.getElementById('filtroDataFim').value = '';
+        document.getElementById('filtroTurno').value = '';
+        limiteExibicao = 10;
+        renderizarPlacares();
+    }
 </script>
 </body>
 </html>
