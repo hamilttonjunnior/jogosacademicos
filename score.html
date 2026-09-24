@@ -351,48 +351,52 @@
         }
         .badge-casa { background: #111111; color: #ffffff; }
         .badge-fora { background: #ffffff; color: #000000; border: 1px solid #000000; }
-        .badge-finalizado { background: #666666; color: #ffffff; }
 
-        /* ESTILO DO HISTÓRICO IDÊNTICO À REFERÊNCIA (BARRA VERDE ESCURA COM LOGOS) */
-        .historico-card-item {
+        /* ESTILO EXATO DA REFERÊNCIA (CARD DE HISTÓRICO) */
+        .historico-card-box {
             background: #ffffff;
-            border: 1px solid var(--gray-border);
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 16px 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .historico-topo-info {
-            font-size: 11px;
+        .historico-header-text {
+            text-align: center;
+            font-size: 12px;
             font-weight: 800;
-            color: var(--gray-dark);
+            color: #111111;
             text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .historico-sub-text {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 10px;
         }
         .historico-barra-verde {
-            background: #113a22; /* Verde escuro do site/referência */
-            border-radius: 10px;
+            background: #0e3b21; /* Tom verde escuro exato da referência */
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 12px 20px;
             color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .time-bloco {
             display: flex;
             align-items: center;
-            gap: 12px;
-            width: 38%;
+            gap: 10px;
+            width: 40%;
         }
         .time-bloco.direita {
             justify-content: flex-end;
             text-align: right;
         }
         .time-logo {
-            width: 30px;
-            height: 30px;
+            width: 26px;
+            height: 26px;
             object-fit: contain;
         }
         .time-nome {
@@ -402,38 +406,30 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .placar-central {
+        .placar-box-central {
             background: #ffffff;
             color: #000000;
-            padding: 6px 20px;
+            padding: 6px 16px;
             border-radius: 6px;
             font-weight: 900;
-            font-size: 16px;
-            letter-spacing: 2px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            font-size: 15px;
+            letter-spacing: 1px;
         }
-        .historico-rodape-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .historico-parciais-linha {
             margin-top: 10px;
-            font-size: 12px;
-            color: var(--gray-dark);
-            font-weight: 600;
-        }
-        .detalhes-extras {
+            font-size: 13px;
+            font-weight: 700;
+            color: #111111;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
-        .icone-stats {
-            background: #f1f3f5;
-            padding: 4px 8px;
-            border-radius: 6px;
-            color: #000000;
-            font-weight: 800;
-            font-size: 11px;
-            display: inline-flex;
+        .historico-coracao {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            display: flex;
             align-items: center;
             gap: 4px;
         }
@@ -450,8 +446,6 @@
             header { flex-direction: column; text-align: center; gap: 15px; }
             .main-content { margin: 15px auto; }
             .container { padding: 20px; }
-            .time-nome { font-size: 12px; }
-            .placar-central { padding: 4px 10px; font-size: 14px; }
         }
     </style>
 </head>
@@ -518,10 +512,10 @@
         <div id="listaMobile" class="mobile-list"></div>
 
         <button class="collapsible-trigger" onclick="toggleSection('historicoContainer')" style="background: var(--finished-text); margin-top: 30px;">
-            <span>📜 HISTÓRICO DE RESULTADOS (ESTILO VISUAL)</span> <span id="historicoContainerIcon">▼</span>
+            <span>📜 HISTÓRICO DE RESULTADOS (ESTILO REFERÊNCIA)</span> <span id="historicoContainerIcon">▼</span>
         </button>
         <div id="historicoContainer" class="collapsible-content">
-            <!-- LISTA DE HISTÓRICO EM FORMATO DE CARDS MODERNOS COM LOGOS -->
+            <!-- HISTÓRICO EXATO IDÊNTICO À SUA IMAGEM DE REFERÊNCIA -->
             <div id="listaHistoricoVisual" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;"></div>
         </div>
     </div>
@@ -536,7 +530,7 @@
     let jogosAtuais = [], listT = [], listE = [], listP = [];
     let initialUrlChecked = false;
 
-    // Dicionário de Logos dos Clubes (Substitua pelos caminhos reais das imagens dos emblemas se houver)
+    // Dicionário de Logos dos Clubes (Substitua ou adicione as siglas dos clubes e caminhos das imagens)
     const logosClubes = {
         "Académicos": "academicos.png",
         "FC Os Académicos": "academicos.png",
@@ -651,42 +645,44 @@
                                  <div class="info-item" style="grid-column: span 2; display:block; margin-top:5px;">🏠 Pav: ${j.pavilhao} ${j.mapsLink ? `<br><a href="${j.mapsLink}" target="_blank" class="maps-btn">📍 Rota Google Maps</a>` : ''}</div>`;
                 lMob.appendChild(card);
             } else {
-                // HISTÓRICO COM O DESIGN EXATO DA IMAGEM DE REFERÊNCIA
-                let nomeTimeCasa = j.casaFora === 'Casa' ? 'FC Académicos' : (j.adversario || 'Adversário');
-                let nomeTimeFora = j.casaFora === 'Fora' ? 'FC Académicos' : (j.adversario || 'Adversário');
-                let logoTimeCasa = j.casaFora === 'Casa' ? obterLogo('Académicos') : obterLogo(j.adversario);
-                let logoTimeFora = j.casaFora === 'Fora' ? obterLogo('Académicos') : obterLogo(j.adversario);
+                // ESTRUTURA EXATA DA SUA IMAGEM DE REFERÊNCIA
+                let timeCasaNome = j.casaFora === 'Casa' ? 'Académicos' : (j.adversario || 'Adversário');
+                let timeForaNome = j.casaFora === 'Fora' ? 'Académicos' : (j.adversario || 'Adversário');
+                let logoCasaImg = j.casaFora === 'Casa' ? obterLogo('Académicos') : obterLogo(j.adversario);
+                let logoForaImg = j.casaFora === 'Fora' ? obterLogo('Académicos') : obterLogo(j.adversario);
 
                 const cardHist = document.createElement('div');
-                cardHist.className = 'historico-card-item';
+                cardHist.className = 'historico-card-box';
                 cardHist.innerHTML = `
-                    <div class="historico-topo-info">
-                        ${j.escalao} • ${j.treinador || 'Treinador'} 2026
-                    </div>
+                    <div class="historico-header-text">${j.escalao || 'Escalão'}</div>
+                    <div class="historico-sub-text">${j.treinador || 'Treinador'} 2026</div>
+                    
                     <div class="historico-barra-verde">
-                        <!-- Time Casa / Esquerda -->
+                        <!-- Esquerda (Casa) -->
                         <div class="time-bloco">
-                            <img src="${logoTimeCasa}" class="time-logo" onerror="this.style.display='none'">
-                            <span class="time-nome">${nomeTimeCasa}</span>
+                            <img src="${logoCasaImg}" class="time-logo" onerror="this.style.display='none'">
+                            <span class="time-nome">${timeCasaNome}</span>
                         </div>
 
                         <!-- Placar Central -->
-                        <div class="placar-central">
+                        <div class="placar-box-central">
                             ${j.setPro} - ${j.setContra}
                         </div>
 
-                        <!-- Time Fora / Direita -->
+                        <!-- Direita (Fora) -->
                         <div class="time-bloco direita">
-                            <span class="time-nome">${nomeTimeFora}</span>
-                            <img src="${logoTimeFora}" class="time-logo" onerror="this.style.display='none'">
+                            <span class="time-nome">${timeForaNome}</span>
+                            <img src="${logoForaImg}" class="time-logo" onerror="this.style.display='none'">
                         </div>
                     </div>
-                    <div class="historico-rodape-card">
-                        <span style="font-weight: 700; color: #333333;">${j.parciais || '---'}</span>
-                        <div class="detalhes-extras">
-                            <span class="icone-stats">📊</span>
-                            <span style="font-weight: 700; color: #e53e3e;">♥ 0</span>
-                        </div>
+
+                    <!-- Parciais e Estatísticas alinhados exatamente igual ao seu print -->
+                    <div class="historico-parciais-linha">
+                        <span>${j.parciais || ''}</span>
+                        <span style="font-size: 15px;">📊</span>
+                    </div>
+                    <div class="historico-coracao">
+                        ♥ 0
                     </div>
                 `;
                 hVisual.appendChild(cardHist);
