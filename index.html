@@ -646,9 +646,9 @@
             color: #ffffff; 
         }
 
-        .row-conflito { background-color: #fff0f0 !important; border-left: 4px solid var(--error) !important; }
-        .row-conflito td { background-color: #fff0f0 !important; }
-        .conflito-card { border-left: 4px solid var(--error) !important; background: #fff0f0 !important; }
+        .row- { background-color: #fff0f0 !important; border-left: 4px solid var(--error) !important; }
+        .row- td { background-color: #fff0f0 !important; }
+        .-card { border-left: 4px solid var(--error) !important; background: #fff0f0 !important; }
         .error-tag { color: var(--error); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 
         /* Estilos para o Conflito de Treinador (Azul Ciano) */
@@ -1044,7 +1044,7 @@
                     <td>
                         ${dt} às ${j.hora}
                         ${temConflitoPav ? '<br><span class="error-tag">⚠️ Conflito Pavilhão</span>' : ''}
-                        ${temConflitoTreinador ? '<br><span class="treinador-error-tag">⚠️ Conflito Treinador (&lt;3h)</span>' : ''}
+                        ${temConflitoTreinador ? '<br><span class="treinador-error-tag">⚠️ Conflito Treinador (&lt;4h)</span>' : ''}
                         ${permiteFinalizar ? `<br><button class="btn-dark" style="padding:4px 8px; font-size:10px; margin-top:5px;" onclick="finalizarJogoPrompt('${j.id}')">🏁 Finalizar</button>` : ''}
                     </td>
                     <td>${j.pavilhao || '---'} ${j.mapsLink ? `<a href="${j.mapsLink}" target="_blank" style="text-decoration:none;">📍</a>` : ''}</td>
@@ -1066,7 +1066,7 @@
                     <div class="info-item">🔢 Jornada: ${j.jornada || '-'}</div>
                     <div class="info-item" style="grid-column: span 2;">📍 Pav: ${j.pavilhao || '---'} ${j.mapsLink ? '📍' : ''}</div>
                     ${temConflitoPav ? '<div class="info-item error-tag" style="grid-column: span 2;">⚠️ Conflito Pavilhão</div>' : ''}
-                    ${temConflitoTreinador ? '<div class="info-item treinador-error-tag" style="grid-column: span 2;">⚠️ Conflito Treinador (&lt;3h)</div>' : ''}
+                    ${temConflitoTreinador ? '<div class="info-item treinador-error-tag" style="grid-column: span 2;">⚠️ Conflito Treinador (&lt;4h)</div>' : ''}
                     <div class="card-actions">
                         <button class="btn-mobile" onclick="prepararEdicao('${j.id}')">✏️ Editar</button>
                         ${permiteFinalizar ? `<button class="btn-mobile" style="background:#000000;color:white;" onclick="finalizarJogoPrompt('${j.id}')">🏁 Finalizar</button>` : ''} 
