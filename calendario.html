@@ -238,7 +238,6 @@
             gap: 12px;
         }
 
-        /* Card Ajustado para Evitar Overflow no Mobile */
         .game-card {
             background: var(--bg-card);
             border-radius: 14px;
@@ -259,7 +258,7 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
 
-        /* Coluna Horário */
+        /* Coluna Horário e Data Pequena */
         .game-time-col {
             display: flex;
             flex-direction: column;
@@ -275,6 +274,13 @@
             line-height: 1.1;
         }
 
+        .game-date-sub {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
         .game-venue-tag {
             display: flex;
             align-items: center;
@@ -284,16 +290,16 @@
             color: var(--text-dark-gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-top: 6px;
+            margin-top: 5px;
         }
 
-        /* Coluna Detalhes com limite rígido para evitar estouro */
+        /* Coluna Detalhes */
         .game-info-col {
             display: flex;
             flex-direction: column;
             border-left: 2px solid var(--border-color);
             padding-left: 14px;
-            min-width: 0; /* Essencial para evitar vazamento em CSS Grid */
+            min-width: 0;
         }
 
         .game-escalao {
@@ -305,7 +311,7 @@
             margin-bottom: 8px;
         }
 
-        /* Duelo de Equipas Responsivo */
+        /* Duelo de Equipas */
         .teams-match {
             display: flex;
             align-items: center;
@@ -323,7 +329,7 @@
             font-weight: 800;
             color: var(--accent-dark);
             flex: 1;
-            min-width: 0; /* Impede vazamento do texto */
+            min-width: 0;
             word-break: break-word;
         }
 
@@ -556,7 +562,6 @@
         return urlParams.get(param);
     }
 
-    // Carregamento de seletores sem duplicados
     onSnapshot(collection(db, "treinadores"), s => { 
         listT = [...new Set(s.docs.map(d => d.data().val?.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b)); 
         updateUIFilters(); 
@@ -602,27 +607,22 @@
         render(); 
     };
 
-    // --- FUNÇÃO DE LOGO REFORÇADA ---
     const getLogoPath = (nomeEquipa) => {
         if (!nomeEquipa || nomeEquipa === '---') return '';
-        
         const cleanName = nomeEquipa.toLowerCase().trim();
         
-        // Se for qualquer variação de "Os Académicos", usa sempre o logo oficial do clube
         if (cleanName.includes('academicos') || cleanName.includes('acadêmicos') || cleanName.includes('fca')) {
             return 'academicos.png';
         }
 
-        // Caso contrário, gera o caminho limpo para a pasta logos/ no GitHub
         const slug = cleanName
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
-            .replace(/[^a-z0-9\s-]/g, '')                     // Remove pontos, aspas
-            .replace(/\s+/g, '-');                            // Substitui espaços por hífen
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-');
             
         return `logos/${slug}.png`;
     };
 
-    // --- FUNÇÃO DE NORMALIZAÇÃO AUTOMÁTICA NO FIREBASE ---
     window.normalizarFirebase = async () => {
         if (!confirm("Tens a certeza que queres limpar espaços extras e padronizar os nomes de todos os jogos no Firebase?")) return;
         try {
@@ -697,9 +697,11 @@
             const homeTeam = isCasa ? 'FC "Os Académicos"' : (j.adversario || '---');
             const awayTeam = isCasa ? (j.adversario || '---') : 'FC "Os Académicos"';
             
-            // Garantia de seleção do logo correto
             const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || getLogoPath(j.adversario));
             const awayLogo = isCasa ? (j.adversarioLogo || getLogoPath(j.adversario)) : 'academicos.png';
+
+            // Formatação da data para DD/MM
+            const dataFormatada = j.data ? j.data.split('-').slice(1).reverse().join('/') : '';
 
             const mapHTML = j.mapsLink ? `<a href="${j.mapsLink}" target="_blank" class="maps-link">📍 Ver Mapa</a>` : '';
 
@@ -710,6 +712,7 @@
                 card.innerHTML = `
                     <div class="game-time-col">
                         <div class="game-time">${j.hora || '--:--'}</div>
+                        ${dataFormatada ? `<div class="game-date-sub">📅 ${dataFormatada}</div>` : ''}
                         <div class="game-venue-tag">${iconLocal} ${j.casaFora}</div>
                     </div>
                     <div class="game-info-col">
@@ -736,6 +739,7 @@
                 card.innerHTML = `
                     <div class="game-time-col">
                         <div class="score-tag">${j.setPro} - ${j.setContra}</div>
+                        ${dataFormatada ? `<div class="game-date-sub">📅 ${dataFormatada}</div>` : ''}
                         <div class="game-venue-tag">FIM</div>
                     </div>
                     <div class="game-info-col">
