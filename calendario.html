@@ -517,6 +517,33 @@
         render(); 
     };
 
+    // Função global de fallback para testar variações de nome do ficheiro de logo
+    window.handleLogoError = (img, nomeEquipa) => {
+        if (!img.dataset.step) img.dataset.step = "1";
+        const step = parseInt(img.dataset.step);
+        
+        const raw = nomeEquipa.trim();
+        const withUnderscores = raw.replace(/\s+/g, '_');
+        const withDashes = raw.replace(/\s+/g, '-');
+
+        if (step === 1) {
+            img.dataset.step = "2";
+            img.src = `logos/${raw}.png`;
+        } else if (step === 2) {
+            img.dataset.step = "3";
+            img.src = `logos/${withUnderscores}.png`;
+        } else if (step === 3) {
+            img.dataset.step = "4";
+            img.src = `logos/${withUnderscores}.PNG`;
+        } else if (step === 4) {
+            img.dataset.step = "5";
+            img.src = `logos/${withDashes}.png`;
+        } else {
+            // Se nenhuma variação existir no GitHub, esconde a imagem para não quebrar o layout
+            img.style.display = 'none';
+        }
+    };
+
     onSnapshot(query(jogosCol, orderBy("data"), orderBy("hora")), (s) => { 
         jogosAtuais = s.docs.map(d => ({ id: d.id, ...d.data() })); 
 
@@ -549,11 +576,10 @@
         containerProximos.innerHTML = '';
         containerHistorico.innerHTML = '';
 
-        // Função para gerar o caminho do logo a partir do nome da equipa na pasta logos/
         const getLogoPath = (nomeEquipa) => {
             if (!nomeEquipa || nomeEquipa === '---') return '';
-            const nomeFicheiro = nomeEquipa.toLowerCase().trim().replace(/\s+/g, '-');
-            return `logos/${nomeFicheiro}.png`;
+            // Primeira tentativa: nome direto do Firebase na pasta logos/
+            return `logos/${nomeEquipa.trim()}.png`;
         };
 
         jogosAtuais.forEach(j => {
@@ -573,7 +599,6 @@
             const homeTeam = isCasa ? 'FC "Os Académicos"' : (j.adversario || '---');
             const awayTeam = isCasa ? (j.adversario || '---') : 'FC "Os Académicos"';
             
-            // Procura o logo no Firebase ou gera automaticamente o caminho para a pasta logos/
             const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || getLogoPath(j.adversario));
             const awayLogo = isCasa ? (j.adversarioLogo || getLogoPath(j.adversario)) : 'academicos.png';
 
@@ -581,6 +606,8 @@
 
             const card = document.createElement('div');
             card.className = 'game-card';
+
+            const advNome = (j.adversario || '').replace(/'/g, "\\'");
 
             if(!j.finalizado) {
                 card.innerHTML = `
@@ -592,13 +619,13 @@
                         <div class="game-escalao">${j.escalao}</div>
                         <div class="teams-match">
                             <div class="team-box home">
-                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="handleLogoError(this, '${advNome}')">` : ''}
                                 <span>${homeTeam}</span>
                             </div>
                             <span class="vs-label">vs</span>
                             <div class="team-box away">
                                 <span>${awayTeam}</span>
-                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="handleLogoError(this, '${advNome}')">` : ''}
                             </div>
                         </div>
                         <div class="game-meta">
@@ -618,13 +645,13 @@
                         <div class="game-escalao">${j.escalao}</div>
                         <div class="teams-match">
                             <div class="team-box home">
-                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="handleLogoError(this, '${advNome}')">` : ''}
                                 <span>${homeTeam}</span>
                             </div>
                             <span class="vs-label">vs</span>
                             <div class="team-box away">
                                 <span>${awayTeam}</span>
-                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="handleLogoError(this, '${advNome}')">` : ''}
                             </div>
                         </div>
                         <div class="game-meta">
