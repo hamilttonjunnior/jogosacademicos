@@ -42,7 +42,7 @@
             margin: 0 auto; 
         }
 
-        /* Top Bar / Header */
+        /* Header */
         header { 
             margin-bottom: 25px; 
         }
@@ -189,7 +189,7 @@
         }
         .multiselect-item:hover { background: var(--bg-body); }
 
-        /* Lista de Jogos - Cards Estilo Minimalista Claro */
+        /* Lista de Jogos */
         .agenda-list {
             display: flex;
             flex-direction: column;
@@ -471,9 +471,21 @@
         return urlParams.get(param);
     }
 
-    onSnapshot(collection(db, "treinadores"), s => { listT = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
-    onSnapshot(collection(db, "escaloes"), s => { listE = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
-    onSnapshot(collection(db, "pavilhoes"), s => { listP = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
+    // Carregamento único de coleções removendo duplicados com Set
+    onSnapshot(collection(db, "treinadores"), s => { 
+        listT = [...new Set(s.docs.map(d => d.data().val?.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b)); 
+        updateUIFilters(); 
+    });
+
+    onSnapshot(collection(db, "escaloes"), s => { 
+        listE = [...new Set(s.docs.map(d => d.data().val?.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b)); 
+        updateUIFilters(); 
+    });
+
+    onSnapshot(collection(db, "pavilhoes"), s => { 
+        listP = [...new Set(s.docs.map(d => d.data().val?.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b)); 
+        updateUIFilters(); 
+    });
 
     function updateUIFilters() {
         const fTSel = document.getElementById('dropT'), fESel = document.getElementById('dropE'), fPSel = document.getElementById('filterPavilhao');
