@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FC "Os Académicos" - Agenda de Jogos</title>
+    <link rel="shortcut icon" type="image/x-icon" href="FCA.ico">
+    <link rel="apple-touch-icon" href="academicos.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="academicos.png">
+    
+    <style>
+        :root { 
+            --bg-body: #080808;
+            --bg-card: #121212;
+            --bg-card-hover: #1a1a1a;
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --border-color: #222222;
+            --accent: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            padding: 20px 15px;
+        }
+
+        .main-content { 
+            width: 100%; 
+            max-width: 680px; 
+            margin: 0 auto; 
+        }
+
+        /* Top Bar / Header estilo Referência */
+        header { 
+            margin-bottom: 25px; 
+        }
+
+        .header-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .header-tag::before {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 2px;
+            background: var(--text-muted);
+        }
+
+        .header-title-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .header-title {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #ffffff;
+        }
+
+        .header-logo {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #ffffff;
+            padding: 2px;
+            object-fit: contain;
+        }
+
+        .header-subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 500;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Painel de Filtros (Estilo escuro retrátil/discreto) */
+        .filter-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+        }
+
+        .filter-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+            gap: 12px; 
+        }
+
+        .field { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+        }
+
+        .field label { 
+            font-size: 10px; 
+            font-weight: 700; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select { 
+            padding: 8px 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            font-size: 12px; 
+            background: #000000; 
+            color: #ffffff;
+            outline: none;
+        }
+
+        /* Custom Multiselect */
+        .multiselect-wrap { position: relative; width: 100%; }
+        .multiselect-selected { 
+            background: #000000; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            padding: 8px 10px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .multiselect-dropdown { 
+            position: absolute; 
+            top: 105%; 
+            left: 0; 
+            width: 100%; 
+            background: #121212; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            z-index: 100; 
+            display: none; 
+            max-height: 180px; 
+            overflow-y: auto; 
+            padding: 5px 0; 
+        }
+        .multiselect-dropdown.show { display: block; }
+        .multiselect-item { 
+            padding: 8px 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 12px; 
+            cursor: pointer; 
+        }
+        .multiselect-item:hover { background: #222222; }
+
+        /* Lista de Jogos - Cards estilo da Imagem */
+        .agenda-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: grid;
+            grid-template-columns: 85px 1fr;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .game-card:hover {
+            background: var(--bg-card-hover);
+            border-color: #2a2a2a;
+        }
+
+        /* Coluna da Esquerda: Horário e Local */
+        .game-time-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .game-time {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .game-venue-tag {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+        }
+
+        /* Coluna da Direita: Detalhes do Jogo */
+        .game-info-col {
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding-left: 15px;
+        }
+
+        .game-escalao {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* Duelo de Equipas */
+        .teams-match {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .team-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            flex: 1;
+        }
+
+        .team-box.away {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .team-logo {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .vs-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0 4px;
+        }
+
+        /* Competicao e Pavilhao */
+        .game-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .game-meta .pavilhao {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+            color: #7a7a7a;
+        }
+
+        .maps-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .maps-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Secção Histórico / Jogos Finalizados */
+        .historico-trigger {
+            width: 100%;
+            padding: 14px;
+            background: #121212;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .collapsible-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s ease; 
+        }
+        .collapsible-content.active { 
+            max-height: 3000px; 
+            margin-top: 15px; 
+        }
+
+        .score-tag {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Rodapé */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: #444444;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-content" id="app">
+    
+    <!-- Header estilo Referência -->
+    <header>
+        <div class="header-tag">Agenda de Jogos</div>
+        <div class="header-title-wrap">
+            <h1 class="header-title" id="displayDiaSemana">Agenda</h1>
+            <img src="academicos.png" alt="FC Os Académicos" class="header-logo" onerror="this.style.display='none'">
+        </div>
+        <div class="header-subtitle" id="displayDataExtenso">FC "Os Académicos" · Voleibol</div>
+    </header>
+
+    <!-- Filtros de Consulta -->
+    <div class="filter-section">
+        <div class="filter-grid">
+            <div class="field">
+                <label>Treinador</label>
+                <div class="multiselect-wrap">
+                    <div class="multiselect-selected" onclick="toggleDrop('dropT')"><span id="txtT">Todos</span> ▾</div>
+                    <div id="dropT" class="multiselect-dropdown"></div>
+                </div>
+            </div>
+            <div class="field">
+                <label>Escalão</label>
+                <div class="multiselect-wrap">
+                    <div class="multiselect-selected" onclick="toggleDrop('dropE')"><span id="txtE">Todos</span> ▾</div>
+                    <div id="dropE" class="multiselect-dropdown"></div>
+                </div>
+            </div>
+            <div class="field"><label>Data Inicial</label><input type="date" id="filterDataInicio" onchange="render()"></div>
+            <div class="field"><label>Data Final</label><input type="date" id="filterDataFim" onchange="render()"></div>
+            <div class="field">
+                <label>Local</label>
+                <select id="filterLocal" onchange="handleFilterLocalChange()">
+                    <option value="">Todos</option>
+                    <option value="Casa">Casa</option>
+                    <option value="Fora">Fora</option>
+                </select>
+            </div>
+            <div class="field" id="filterPavilhaoContainer" style="display:none;">
+                <label>Pavilhão</label>
+                <select id="filterPavilhao" onchange="render()"><option value="">Todos</option></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Jogos Principais -->
+    <div id="listaJogos" class="agenda-list"></div>
+
+    <!-- Histórico de Resultados -->
+    <button class="historico-trigger" onclick="toggleSection('historicoContainer')">
+        <span>HISTÓRICO DE RESULTADOS</span>
+        <span id="historicoContainerIcon">▼</span>
+    </button>
+    
+    <div id="historicoContainer" class="collapsible-content">
+        <div id="listaHistorico" class="agenda-list" style="margin-top: 10px;"></div>
+    </div>
+
+    <footer>
+        FC "Os Académicos" · Voleibol
+    </footer>
+
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyB86TeZnp2qdOXXwjvD3hFfzTi3Z3NkVMc", 
+        authDomain: "academicos-d2cfc.firebaseapp.com", 
+        projectId: "academicos-d2cfc", 
+        storageBucket: "academicos-d2cfc.firebasestorage.app", 
+        messagingSenderId: "550824625713", 
+        appId: "1:550824625713:web:f3194f8e4f06dc141a3710" 
+    };
+    
+    const app = initializeApp(firebaseConfig); 
+    const db = getFirestore(app); 
+    const jogosCol = collection(db, "jogos");
+    
+    let jogosAtuais = [], listT = [], listE = [], listP = [];
+    let initialUrlChecked = false;
+
+    function getUrlParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    onSnapshot(collection(db, "treinadores"), s => { listT = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
+    onSnapshot(collection(db, "escaloes"), s => { listE = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
+    onSnapshot(collection(db, "pavilhoes"), s => { listP = s.docs.map(d => d.data().val).sort((a,b) => a.localeCompare(b)); updateUIFilters(); });
+
+    function updateUIFilters() {
+        const fTSel = document.getElementById('dropT'), fESel = document.getElementById('dropE'), fPSel = document.getElementById('filterPavilhao');
+        fPSel.innerHTML = '<option value="">Todos</option>' + listP.map(x => `<option value="${x}">${x}</option>`).join('');
+        fTSel.innerHTML = listT.map(x => `<label class="multiselect-item"><input type="checkbox" value="${x}" onchange="updateMulti('T')"> ${x}</label>`).join('');
+        fESel.innerHTML = listE.map(x => `<label class="multiselect-item"><input type="checkbox" value="${x}" onchange="updateMulti('E')"> ${x}</label>`).join('');
+    }
+
+    window.toggleSection = (id) => { 
+        const c = document.getElementById(id); 
+        const icon = document.getElementById(id + 'Icon'); 
+        c.classList.toggle('active'); 
+        icon.innerText = c.classList.contains('active') ? '▲' : '▼'; 
+    };
+
+    window.toggleDrop = (id) => { 
+        document.querySelectorAll('.multiselect-dropdown').forEach(el => { if(el.id !== id) el.classList.remove('show'); }); 
+        document.getElementById(id).classList.toggle('show'); 
+    };
+
+    window.updateMulti = (type) => { 
+        const items = Array.from(document.querySelectorAll(`#drop${type} input:checked`)); 
+        document.getElementById(`txt${type}`).innerText = items.length === 0 ? "Todos" : (items.length === 1 ? items[0].value : `${items.length} Selecionados`); 
+        render(); 
+    };
+
+    window.handleFilterLocalChange = () => { 
+        document.getElementById('filterPavilhaoContainer').style.display = (document.getElementById('filterLocal').value === 'Casa') ? 'flex' : 'none'; 
+        render(); 
+    };
+
+    onSnapshot(query(jogosCol, orderBy("data"), orderBy("hora")), (s) => { 
+        jogosAtuais = s.docs.map(d => ({ id: d.id, ...d.data() })); 
+
+        if (!initialUrlChecked) {
+            const dInicio = getUrlParam('dataInicio') || getUrlParam('data');
+            const dFim = getUrlParam('dataFim');
+            
+            if (dInicio) document.getElementById('filterDataInicio').value = dInicio;
+            if (dFim) document.getElementById('filterDataFim').value = dFim;
+            
+            initialUrlChecked = true;
+        }
+
+        render(); 
+    });
+
+    window.render = () => {
+        const containerProximos = document.getElementById('listaJogos');
+        const containerHistorico = document.getElementById('listaHistorico');
+        
+        const selT = Array.from(document.querySelectorAll('#dropT input:checked')).map(i => i.value);
+        const selE = Array.from(document.querySelectorAll('#dropE input:checked')).map(i => i.value);
+        const fDInicio = document.getElementById('filterDataInicio').value;
+        const fDFim = document.getElementById('filterDataFim').value;
+        const fL = document.getElementById('filterLocal').value;
+        const fP = document.getElementById('filterPavilhao').value;
+        
+        const hojeStr = new Date().toISOString().split('T')[0];
+
+        containerProximos.innerHTML = '';
+        containerHistorico.innerHTML = '';
+
+        jogosAtuais.forEach(j => {
+            if(selT.length > 0 && !selT.includes(j.treinador)) return; 
+            if(selE.length > 0 && !selE.includes(j.escalao)) return; 
+            
+            const dataLimiteInicio = fDInicio || hojeStr;
+            if(j.data < dataLimiteInicio) return;
+            if(fDFim && j.data > fDFim) return;
+
+            if(fL && j.casaFora !== fL) return; 
+            if(fL === 'Casa' && fP && j.pavilhao !== fP) return;
+
+            const isCasa = j.casaFora === 'Casa';
+            const iconLocal = isCasa ? '🏚' : '🚌';
+            
+            // Definição dos Nomes e Logos de Casa vs Fora
+            const homeTeam = isCasa ? 'FC "Os Académicos"' : (j.adversario || '---');
+            const awayTeam = isCasa ? (j.adversario || '---') : 'FC "Os Académicos"';
+            
+            const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || '');
+            const awayLogo = isCasa ? (j.adversarioLogo || '') : 'academicos.png';
+
+            const mapHTML = j.mapsLink ? `<a href="${j.mapsLink}" target="_blank" class="maps-link">📍 Ver Mapa</a>` : '';
+
+            const card = document.createElement('div');
+            card.className = 'game-card';
+
+            if(!j.finalizado) {
+                card.innerHTML = `
+                    <div class="game-time-col">
+                        <div class="game-time">${j.hora || '--:--'}</div>
+                        <div class="game-venue-tag">${iconLocal} ${j.casaFora}</div>
+                    </div>
+                    <div class="game-info-col">
+                        <div class="game-escalao">${j.escalao}</div>
+                        <div class="teams-match">
+                            <div class="team-box home">
+                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                <span>${homeTeam}</span>
+                            </div>
+                            <span class="vs-label">vs</span>
+                            <div class="team-box away">
+                                <span>${awayTeam}</span>
+                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                            </div>
+                        </div>
+                        <div class="game-meta">
+                            <div>${j.competicao || ''} ${j.jornada ? '· Jor. ' + j.jornada : ''}</div>
+                            <div class="pavilhao">📍 ${j.pavilhao || 'Pavilhão não definido'} ${mapHTML}</div>
+                        </div>
+                    </div>
+                `;
+                containerProximos.appendChild(card);
+            } else {
+                card.innerHTML = `
+                    <div class="game-time-col">
+                        <div class="score-tag">${j.setPro} - ${j.setContra}</div>
+                        <div class="game-venue-tag">FIM</div>
+                    </div>
+                    <div class="game-info-col">
+                        <div class="game-escalao">${j.escalao}</div>
+                        <div class="teams-match">
+                            <div class="team-box home"><span>${homeTeam}</span></div>
+                            <span class="vs-label">vs</span>
+                            <div class="team-box away"><span>${awayTeam}</span></div>
+                        </div>
+                        <div class="game-meta">
+                            <div>Parciais: ${j.parciais || 'N/A'}</div>
+                            <div>${j.competicao || ''}</div>
+                        </div>
+                    </div>
+                `;
+                containerHistorico.appendChild(card);
+            }
+        });
+    };
+
+    window.onclick = (e) => { 
+        if (!e.target.closest('.multiselect-wrap')) { 
+            document.querySelectorAll('.multiselect-dropdown').forEach(el => el.classList.remove('show')); 
+        } 
+    };
+</script>
+</body>
+</html>
