@@ -471,7 +471,7 @@
         return urlParams.get(param);
     }
 
-    // Carregamento único de coleções removendo duplicados com Set
+    // Carregamento de coleções com remoção de duplicados usando Set
     onSnapshot(collection(db, "treinadores"), s => { 
         listT = [...new Set(s.docs.map(d => d.data().val?.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b)); 
         updateUIFilters(); 
@@ -549,6 +549,13 @@
         containerProximos.innerHTML = '';
         containerHistorico.innerHTML = '';
 
+        // Função para gerar o caminho do logo a partir do nome da equipa na pasta logos/
+        const getLogoPath = (nomeEquipa) => {
+            if (!nomeEquipa || nomeEquipa === '---') return '';
+            const nomeFicheiro = nomeEquipa.toLowerCase().trim().replace(/\s+/g, '-');
+            return `logos/${nomeFicheiro}.png`;
+        };
+
         jogosAtuais.forEach(j => {
             if(selT.length > 0 && !selT.includes(j.treinador)) return; 
             if(selE.length > 0 && !selE.includes(j.escalao)) return; 
@@ -566,8 +573,9 @@
             const homeTeam = isCasa ? 'FC "Os Académicos"' : (j.adversario || '---');
             const awayTeam = isCasa ? (j.adversario || '---') : 'FC "Os Académicos"';
             
-            const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || '');
-            const awayLogo = isCasa ? (j.adversarioLogo || '') : 'academicos.png';
+            // Procura o logo no Firebase ou gera automaticamente o caminho para a pasta logos/
+            const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || getLogoPath(j.adversario));
+            const awayLogo = isCasa ? (j.adversarioLogo || getLogoPath(j.adversario)) : 'academicos.png';
 
             const mapHTML = j.mapsLink ? `<a href="${j.mapsLink}" target="_blank" class="maps-link">📍 Ver Mapa</a>` : '';
 
@@ -609,9 +617,15 @@
                     <div class="game-info-col">
                         <div class="game-escalao">${j.escalao}</div>
                         <div class="teams-match">
-                            <div class="team-box home"><span>${homeTeam}</span></div>
+                            <div class="team-box home">
+                                ${homeLogo ? `<img src="${homeLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                                <span>${homeTeam}</span>
+                            </div>
                             <span class="vs-label">vs</span>
-                            <div class="team-box away"><span>${awayTeam}</span></div>
+                            <div class="team-box away">
+                                <span>${awayTeam}</span>
+                                ${awayLogo ? `<img src="${awayLogo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                            </div>
                         </div>
                         <div class="game-meta">
                             <div>Parciais: ${j.parciais || 'N/A'}</div>
