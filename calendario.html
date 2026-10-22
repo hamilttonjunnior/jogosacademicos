@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="academicos.png">
     
     <style>
-        /* TEMA CLARO (Padrão) */
+        /* TEMA CLARO */
         :root { 
             --bg-body: #f8f9fa;
             --bg-card: #ffffff;
@@ -22,7 +22,7 @@
             --logo-bg: #ffffff;
         }
 
-        /* TEMA ESCURO (Ativado via classe no body) */
+        /* TEMA ESCURO */
         body.dark-mode {
             --bg-body: #080808;
             --bg-card: #121212;
@@ -48,7 +48,7 @@
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
-            padding: 20px 15px;
+            padding: 20px 12px;
             transition: background 0.3s, color 0.3s;
         }
 
@@ -238,16 +238,18 @@
             gap: 12px;
         }
 
+        /* Card Ajustado para Evitar Overflow no Mobile */
         .game-card {
             background: var(--bg-card);
             border-radius: 14px;
-            padding: 18px 20px;
+            padding: 16px;
             display: grid;
-            grid-template-columns: 85px 1fr;
-            gap: 15px;
+            grid-template-columns: 75px 1fr;
+            gap: 12px;
             align-items: center;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            overflow: hidden;
             transition: background 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.3s;
         }
 
@@ -257,7 +259,7 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
 
-        /* Coluna Horário e Local */
+        /* Coluna Horário */
         .game-time-col {
             display: flex;
             flex-direction: column;
@@ -266,7 +268,7 @@
         }
 
         .game-time {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
             letter-spacing: -0.5px;
             color: var(--accent-dark);
@@ -276,7 +278,7 @@
         .game-venue-tag {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             font-size: 10px;
             font-weight: 800;
             color: var(--text-dark-gray);
@@ -285,12 +287,13 @@
             margin-top: 6px;
         }
 
-        /* Coluna de Detalhes do Jogo */
+        /* Coluna Detalhes com limite rígido para evitar estouro */
         .game-info-col {
             display: flex;
             flex-direction: column;
             border-left: 2px solid var(--border-color);
-            padding-left: 18px;
+            padding-left: 14px;
+            min-width: 0; /* Essencial para evitar vazamento em CSS Grid */
         }
 
         .game-escalao {
@@ -302,23 +305,26 @@
             margin-bottom: 8px;
         }
 
-        /* Equipas */
+        /* Duelo de Equipas Responsivo */
         .teams-match {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 8px;
+            min-width: 0;
         }
 
         .team-box {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 6px;
+            font-size: 13px;
             font-weight: 800;
             color: var(--accent-dark);
             flex: 1;
+            min-width: 0; /* Impede vazamento do texto */
+            word-break: break-word;
         }
 
         .team-box.away {
@@ -327,8 +333,8 @@
         }
 
         .team-logo {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: #ffffff;
             border: 1px solid var(--border-color);
@@ -337,23 +343,26 @@
         }
 
         .vs-label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             font-weight: 700;
-            padding: 0 4px;
+            flex-shrink: 0;
+            padding: 0 2px;
         }
 
-        /* Meta / Local */
+        /* Meta e Pavilhão */
         .game-meta {
             font-size: 11px;
             color: var(--text-dark-gray);
             font-weight: 500;
             line-height: 1.4;
+            word-break: break-word;
         }
 
         .game-meta .pavilhao {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 4px;
             margin-top: 2px;
             color: var(--text-muted);
@@ -364,7 +373,7 @@
             color: var(--accent-dark);
             text-decoration: underline;
             font-weight: 700;
-            margin-left: 4px;
+            margin-left: 2px;
         }
 
         /* Histórico Retrátil */
@@ -523,7 +532,7 @@
     let jogosAtuais = [], listT = [], listE = [], listP = [];
     let initialUrlChecked = false;
 
-    // --- GESTÃO DE TEMA (CLARO / ESCURO) ---
+    // --- GESTÃO DE TEMA ---
     window.toggleTheme = () => {
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
@@ -537,7 +546,6 @@
         document.getElementById('themeText').innerText = isDark ? 'Claro' : 'Escuro';
     }
 
-    // Carrega o tema salvo do utilizador
     if (localStorage.getItem('fca_theme') === 'dark') {
         document.body.classList.add('dark-mode');
     }
@@ -594,14 +602,23 @@
         render(); 
     };
 
-    // --- FUNÇÃO PARA CONVERTER NOME DA EQUIPA PARA LOGO NO GITHUB ---
+    // --- FUNÇÃO DE LOGO REFORÇADA ---
     const getLogoPath = (nomeEquipa) => {
         if (!nomeEquipa || nomeEquipa === '---') return '';
-        const slug = nomeEquipa.toLowerCase()
-            .trim()
+        
+        const cleanName = nomeEquipa.toLowerCase().trim();
+        
+        // Se for qualquer variação de "Os Académicos", usa sempre o logo oficial do clube
+        if (cleanName.includes('academicos') || cleanName.includes('acadêmicos') || cleanName.includes('fca')) {
+            return 'academicos.png';
+        }
+
+        // Caso contrário, gera o caminho limpo para a pasta logos/ no GitHub
+        const slug = cleanName
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
-            .replace(/[^a-z0-9\s-]/g, '')                     // Remove pontos, aspas, etc.
+            .replace(/[^a-z0-9\s-]/g, '')                     // Remove pontos, aspas
             .replace(/\s+/g, '-');                            // Substitui espaços por hífen
+            
         return `logos/${slug}.png`;
     };
 
@@ -627,7 +644,7 @@
             alert(`Concluído com sucesso! ${alterados} registos foram corrigidos no Firebase.`);
         } catch (err) {
             console.error(err);
-            alert("Erro ao atualizar os registos. Verifica as permissões da consola.");
+            alert("Erro ao atualizar os registos. Verifica as permissões.");
         }
     };
 
@@ -680,6 +697,7 @@
             const homeTeam = isCasa ? 'FC "Os Académicos"' : (j.adversario || '---');
             const awayTeam = isCasa ? (j.adversario || '---') : 'FC "Os Académicos"';
             
+            // Garantia de seleção do logo correto
             const homeLogo = isCasa ? 'academicos.png' : (j.adversarioLogo || getLogoPath(j.adversario));
             const awayLogo = isCasa ? (j.adversarioLogo || getLogoPath(j.adversario)) : 'academicos.png';
 
