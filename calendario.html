@@ -737,9 +737,13 @@
                 `;
                 containerProximos.appendChild(card);
             } else {
+                // Inversão correta dos pontos: Se for 'Casa' -> setPro - setContra | Se for 'Fora' -> setContra - setPro
+                const scoreHome = isCasa ? j.setPro : j.setContra;
+                const scoreAway = isCasa ? j.setContra : j.setPro;
+
                 card.innerHTML = `
                     <div class="game-time-col">
-                        <div class="score-tag">${j.setPro} - ${j.setContra}</div>
+                        <div class="score-tag">${scoreHome} - ${scoreAway}</div>
                         ${dataFormatada ? `<div class="game-date-sub">📅 ${dataFormatada}</div>` : ''}
                         <div class="game-venue-tag">FIM</div>
                     </div>
