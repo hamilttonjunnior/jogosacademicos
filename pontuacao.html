@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score & Resultados - FC Os Académicos</title>
+    <link rel="shortcut icon" type="image/x-icon" href="FCA.ico">
+    <link rel="apple-touch-icon" href="academicos.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="academicos.png">
+    <meta name="apple-mobile-web-app-title" content="Académicos Score">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #000000;
+            --accent: #1a1a1a;
+            --win: #16a34a;
+            --win-bg: #f0fdf4;
+            --win-border: #bbf7d0;
+            --loss: #dc2626;
+            --loss-bg: #fef2f2;
+            --loss-border: #fecaca;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --gray-light: #f1f3f5;
+            --gray-border: #e2e8f0;
+            --gray-dark: #64748b;
+            --text-main: #111111;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            width: 96%;
+            max-width: 1280px;
+            margin: 25px auto;
+            flex: 1;
+        }
+
+        /* Header seguindo o padrão visual da página Calendário */
+        header {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        /* Espaço dedicado para logo.png */
+        .club-logo-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            background: var(--gray-light);
+            border: 1px solid var(--gray-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            padding: 6px;
+        }
+
+        .club-logo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .header-titles span.tag {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-dark);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .header-titles h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--primary);
+        }
+
+        .header-titles p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: var(--gray-dark);
+            font-weight: 600;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--gray-border);
+            background: var(--gray-light);
+            color: var(--primary);
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        /* Filtros */
+        .filters-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--primary);
+        }
+
+        select {
+            padding: 12px;
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #ffffff;
+            color: var(--primary);
+            outline: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-reset {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-border);
+            background: var(--gray-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #e2e8f0;
+        }
+
+        /* KPIs / Resumo Geral */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-card h3 {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--gray-dark);
+        }
+
+        .kpi-card .value {
+            margin: 8px 0 4px;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .kpi-card .sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .kpi-card.vitorias {
+            background: var(--win-bg);
+            border-color: var(--win-border);
+        }
+        .kpi-card.vitorias h3, .kpi-card.vitorias .value {
+            color: var(--win);
+        }
+
+        .kpi-card.derrotas {
+            background: var(--loss-bg);
+            border-color: var(--loss-border);
+        }
+        .kpi-card.derrotas h3, .kpi-card.derrotas .value {
+            color: var(--loss);
+        }
+
+        .kpi-card.destaque {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+        .kpi-card.destaque h3 {
+            color: #94a3b8;
+        }
+        .kpi-card.destaque .value {
+            color: #ffffff;
+        }
+        .kpi-card.destaque .sub {
+            color: #cbd5e1;
+        }
+
+        /* Barra de Aproveitamento Visual */
+        .winrate-bar-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 18px 24px;
+            margin-bottom: 30px;
+        }
+
+        .winrate-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .winrate-track {
+            width: 100%;
+            height: 12px;
+            background: var(--loss);
+            border-radius: 999px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .winrate-fill {
+            height: 100%;
+            background: var(--win);
+            transition: width 0.5s ease;
+        }
+
+        /* Títulos de Seção */
+        .section-title {
+            font-size: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 0 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Resumo por Escalão (Tabela + Cards) */
+        .escaloes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .escalao-card {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .escalao-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        }
+
+        .escalao-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-border);
+            padding-bottom: 10px;
+        }
+
+        .escalao-card-header h4 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .escalao-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--gray-light);
+            color: var(--primary);
+        }
+
+        .escalao-stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            text-align: center;
+            gap: 6px;
+        }
+
+        .escalao-stat span {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gray-dark);
+            text-transform: uppercase;
+        }
+
+        .escalao-stat strong {
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .mini-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--loss-border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            background: var(--win);
+        }
+
+        /* Lista de Confrontos / Placares */
+        .matches-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .match-card {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            border-radius: 14px;
+            padding: 18px 24px;
+            display: grid;
+            grid-template-columns: 180px 1fr 160px;
+            align-items: center;
+            gap: 20px;
+            border-left: 5px solid var(--gray-border);
+        }
+
+        .match-card.is-win {
+            border-left-color: var(--win);
+        }
+
+        .match-card.is-loss {
+            border-left-color: var(--loss);
+        }
+
+        .match-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .match-escalao {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .match-comp {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .match-date {
+            font-size: 11px;
+            color: var(--gray-dark);
+            margin-top: 2px;
+        }
+
+        /* Placar Central com Logos */
+        .scoreboard {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .team-side {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .team-side.home {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .team-side.away {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .team-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .team-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--gray-light);
+            border: 1px solid var(--gray-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            padding: 4px;
+        }
+
+        .team-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .team-fallback {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--gray-dark);
+            text-transform: uppercase;
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 110px;
+        }
+
+        .score-numbers {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-parciais {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-dark);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .match-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .result-pill {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-pill.win {
+            background: var(--win-bg);
+            color: var(--win);
+            border: 1px solid var(--win-border);
+        }
+
+        .result-pill.loss {
+            background: var(--loss-bg);
+            color: var(--loss);
+            border: 1px solid var(--loss-border);
+        }
+
+        .local-pill {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gray-dark);
+        }
+
+        .empty-state {
+            background: var(--card-bg);
+            border: 1px dashed var(--gray-border);
+            border-radius: 14px;
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--gray-dark);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-dark);
+            border-top: 1px solid var(--gray-border);
+            background: var(--card-bg);
+            margin-top: auto;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .match-card {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 16px;
+            }
+            .match-meta {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--gray-border);
+                padding-bottom: 8px;
+            }
+            .match-status {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px solid var(--gray-border);
+                padding-top: 8px;
+            }
+            .team-name {
+                font-size: 13px;
+            }
+            .team-logo {
+                width: 36px;
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <div class="header-left">
+            <!-- Espaço reservado para logo.png (com fallback automático para academicos.png) -->
+            <div class="club-logo-box">
+                <img src="logo.png" alt="Logo FC Os Académicos" onerror="this.onerror=null; this.src='academicos.png';">
+            </div>
+            <div class="header-titles">
+                <span class="tag">Painel de Desempenho · 2026/2027</span>
+                <h1>Score & Resultados</h1>
+                <p>FC "Os Académicos" · Voleibol</p>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a href="calendario.html" class="nav-btn">📅 Ver Agenda</a>
+        </div>
+    </header>
+
+    <!-- Barra de Filtros -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label for="filterEscalao">🏐 Escalão</label>
+            <select id="filterEscalao" onchange="renderScore()">
+                <option value="">Todos os Escalões</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterCompeticao">🏆 Campeonato / Competição</label>
+            <select id="filterCompeticao" onchange="renderScore()">
+                <option value="">Todas as Competições</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterLocal">📍 Mando de Campo</label>
+            <select id="filterLocal" onchange="renderScore()">
+                <option value="">Todos (Casa e Fora)</option>
+                <option value="Casa">Jogos em Casa</option>
+                <option value="Fora">Jogos Fora</option>
+            </select>
+        </div>
+        <button class="btn-reset" onclick="resetFilters()">Limpar Filtros</button>
+    </div>
+
+    <!-- Cards de Resumo (KPIs) -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <h3>Jogos Disputados</h3>
+            <div class="value" id="kpiJogos">0</div>
+            <div class="sub">Partidas finalizadas</div>
+        </div>
+        <div class="kpi-card vitorias">
+            <h3>Vitórias</h3>
+            <div class="value" id="kpiVitorias">0</div>
+            <div class="sub" id="kpiVitoriasCasaFora">0 Casa · 0 Fora</div>
+        </div>
+        <div class="kpi-card derrotas">
+            <h3>Derrotas</h3>
+            <div class="value" id="kpiDerrotas">0</div>
+            <div class="sub" id="kpiDerrotasCasaFora">0 Casa · 0 Fora</div>
+        </div>
+        <div class="kpi-card">
+            <h3>Sets (Pró / Contra)</h3>
+            <div class="value" id="kpiSets">0 - 0</div>
+            <div class="sub" id="kpiSaldoSets">Saldo: 0</div>
+        </div>
+        <div class="kpi-card destaque">
+            <h3>Aproveitamento</h3>
+            <div class="value" id="kpiAproveitamento">0%</div>
+            <div class="sub">Taxa de vitórias</div>
+        </div>
+    </div>
+
+    <!-- Barra Visual Vitórias vs Derrotas -->
+    <div class="winrate-bar-wrap" id="winrateWrap" style="display:none;">
+        <div class="winrate-labels">
+            <span style="color: var(--win);" id="barLabelWin">Vitórias: 0%</span>
+            <span style="color: var(--loss);" id="barLabelLoss">Derrotas: 0%</span>
+        </div>
+        <div class="winrate-track">
+            <div class="winrate-fill" id="winrateFill" style="width: 50%;"></div>
+        </div>
+    </div>
+
+    <!-- Resumo Agrupado por Escalão -->
+    <div id="secaoEscalaoWrapper">
+        <div class="section-title">
+            <span>📊 Desempenho por Escalão</span>
+            <span style="font-size: 11px; color: var(--gray-dark); font-weight: 600;">Clique num escalão para filtrar</span>
+        </div>
+        <div class="escaloes-grid" id="escaloesGrid"></div>
+    </div>
+
+    <!-- Histórico Detalhado de Confrontos -->
+    <div class="section-title">
+        <span>🏐 Resultados Oficiais</span>
+        <span style="font-size: 12px; color: var(--gray-dark); font-weight: 700;" id="countMatchesLabel">0 jogos</span>
+    </div>
+    <div class="matches-list" id="matchesList">
+        <div class="empty-state">A carregar resultados do campeonato...</div>
+    </div>
+</div>
+
+<footer>
+    FC "Os Académicos" · Voleibol<br>
+    Painel de Estatísticas e Resultados
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB86TeZnp2qdOXXwjvD3hFfzTi3Z3NkVMc",
+        authDomain: "academicos-d2cfc.firebaseapp.com",
+        projectId: "academicos-d2cfc",
+        storageBucket: "academicos-d2cfc.firebasestorage.app",
+        messagingSenderId: "550824625713",
+        appId: "1:550824625713:web:f3194f8e4f06dc141a3710"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const jogosCol = collection(db, "jogos");
+
+    let jogosFinalizados = [];
+
+    // Converte o nome do adversário em nome de arquivo limpo para buscar na pasta logo/
+    // Exemplo: "SC Braga" -> "logo/sc-braga.png"
+    function getLogoPath(teamName) {
+        if (!teamName) return '';
+        const slug = teamName
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // remove acentos
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")     // troca espaços e símbolos por hífen
+            .replace(/^-+|-+$/g, "");        // remove hífens nas pontas
+        return `logo/${slug}.png`;
+    }
+
+    // Gera iniciais caso a imagem da pasta logo/ ainda não exista
+    function getInitials(teamName) {
+        if (!teamName) return '?';
+        const words = teamName.trim().split(/\s+/);
+        if (words.length === 1) return words[0].substring(0, 3).toUpperCase();
+        return (words[0][0] + words[1][0]).toUpperCase();
+    }
+
+    // Carrega os jogos em tempo real do mesmo Firebase da agenda
+    onSnapshot(query(jogosCol, orderBy("data", "desc")), (snapshot) => {
+        const todos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Filtra apenas jogos finalizados com placar registrado
+        jogosFinalizados = todos.filter(j => j.finalizado === true);
+        populateFilters();
+        renderScore();
+    });
+
+    function populateFilters() {
+        const selEscalao = document.getElementById('filterEscalao');
+        const selComp = document.getElementById('filterCompeticao');
+
+        const currentEsc = selEscalao.value;
+        const currentComp = selComp.value;
+
+        const escaloesUnicos = [...new Set(jogosFinalizados.map(j => j.escalao).filter(Boolean))].sort();
+        const compsUnicas = [...new Set(jogosFinalizados.map(j => j.competicao?.trim()).filter(Boolean))].sort();
+
+        selEscalao.innerHTML = '<option value="">Todos os Escalões</option>' +
+            escaloesUnicos.map(e => `<option value="${e}">${e}</option>`).join('');
+
+        selComp.innerHTML = '<option value="">Todas as Competições</option>' +
+            compsUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
+
+        if (escaloesUnicos.includes(currentEsc)) selEscalao.value = currentEsc;
+        if (compsUnicas.includes(currentComp)) selComp.value = currentComp;
+    }
+
+    window.selectEscalaoCard = (escalaoName) => {
+        const sel = document.getElementById('filterEscalao');
+        sel.value = (sel.value === escalaoName) ? '' : escalaoName;
+        renderScore();
+    };
+
+    window.resetFilters = () => {
+        document.getElementById('filterEscalao').value = '';
+        document.getElementById('filterCompeticao').value = '';
+        document.getElementById('filterLocal').value = '';
+        renderScore();
+    };
+
+    window.renderScore = () => {
+        const fEsc = document.getElementById('filterEscalao').value;
+        const fComp = document.getElementById('filterCompeticao').value;
+        const fLoc = document.getElementById('filterLocal').value;
+
+        const filtrados = jogosFinalizados.filter(j => {
+            if (fEsc && j.escalao !== fEsc) return false;
+            if (fComp && (j.competicao?.trim() || '') !== fComp) return false;
+            if (fLoc && j.casaFora !== fLoc) return false;
+            return true;
+        });
+
+        // Cálculo de KPIs
+        let total = filtrados.length;
+        let vitorias = 0, derrotas = 0;
+        let vitCasa = 0, vitFora = 0;
+        let derCasa = 0, derFora = 0;
+        let setsProTotal = 0, setsContraTotal = 0;
+
+        filtrados.forEach(j => {
+            const sp = parseInt(j.setPro) || 0;
+            const sc = parseInt(j.setContra) || 0;
+            setsProTotal += sp;
+            setsContraTotal += sc;
+
+            if (sp > sc) {
+                vitorias++;
+                if (j.casaFora === 'Casa') vitCasa++; else vitFora++;
+            } else if (sc > sp) {
+                derrotas++;
+                if (j.casaFora === 'Casa') derCasa++; else derFora++;
+            }
+        });
+
+        const saldoSets = setsProTotal - setsContraTotal;
+        const pctWin = total > 0 ? Math.round((vitorias / total) * 100) : 0;
+        const pctLoss = total > 0 ? (100 - pctWin) : 0;
+
+        document.getElementById('kpiJogos').innerText = total;
+        document.getElementById('kpiVitorias').innerText = vitorias;
+        document.getElementById('kpiVitoriasCasaFora').innerText = `${vitCasa} Casa · ${vitFora} Fora`;
+        document.getElementById('kpiDerrotas').innerText = derrotas;
+        document.getElementById('kpiDerrotasCasaFora').innerText = `${derCasa} Casa · ${derFora} Fora`;
+        document.getElementById('kpiSets').innerText = `${setsProTotal} - ${setsContraTotal}`;
+        document.getElementById('kpiSaldoSets').innerText = `Saldo: ${saldoSets > 0 ? '+' + saldoSets : saldoSets}`;
+        document.getElementById('kpiAproveitamento').innerText = `${pctWin}%`;
+
+        // Atualiza barra visual
+        const winrateWrap = document.getElementById('winrateWrap');
+        if (total > 0) {
+            winrateWrap.style.display = 'block';
+            document.getElementById('barLabelWin').innerText = `Vitórias: ${vitorias} (${pctWin}%)`;
+            document.getElementById('barLabelLoss').innerText = `Derrotas: ${derrotas} (${pctLoss}%)`;
+            document.getElementById('winrateFill').style.width = `${pctWin}%`;
+        } else {
+            winrateWrap.style.display = 'none';
+        }
+
+        // Agrupamento por Escalão (considera filtro de campeonato/local, mas mostra todos os escalões se nenhum estiver selecionado)
+        const baseParaEscaloes = jogosFinalizados.filter(j => {
+            if (fComp && (j.competicao?.trim() || '') !== fComp) return false;
+            if (fLoc && j.casaFora !== fLoc) return false;
+            return true;
+        });
+
+        const mapEscaloes = {};
+        baseParaEscaloes.forEach(j => {
+            const esc = j.escalao || 'Sem Escalão';
+            if (!mapEscaloes[esc]) {
+                mapEscaloes[esc] = { nome: esc, jogos: 0, v: 0, d: 0, sp: 0, sc: 0 };
+            }
+            const sp = parseInt(j.setPro) || 0;
+            const sc = parseInt(j.setContra) || 0;
+            mapEscaloes[esc].jogos++;
+            mapEscaloes[esc].sp += sp;
+            mapEscaloes[esc].sc += sc;
+            if (sp > sc) mapEscaloes[esc].v++;
+            else if (sc > sp) mapEscaloes[esc].d++;
+        });
+
+        const escaloesArr = Object.values(mapEscaloes).sort((a, b) => a.nome.localeCompare(b.nome));
+        const escaloesGrid = document.getElementById('escaloesGrid');
+
+        if (escaloesArr.length === 0) {
+            document.getElementById('secaoEscalaoWrapper').style.display = 'none';
+        } else {
+            document.getElementById('secaoEscalaoWrapper').style.display = 'block';
+            escaloesGrid.innerHTML = escaloesArr.map(e => {
+                const taxa = e.jogos > 0 ? Math.round((e.v / e.jogos) * 100) : 0;
+                const ativo = fEsc === e.nome ? 'border: 2px solid #000000; background: #fafafa;' : '';
+                return `
+                    <div class="escalao-card" style="${ativo}" onclick="selectEscalaoCard('${e.nome}')">
+                        <div class="escalao-card-header">
+                            <h4>${e.nome}</h4>
+                            <span class="escalao-badge">${taxa}% vitórias</span>
+                        </div>
+                        <div class="escalao-stats-row">
+                            <div class="escalao-stat"><span>Jogos</span><strong>${e.jogos}</strong></div>
+                            <div class="escalao-stat"><span>Vitórias</span><strong style="color:var(--win)">${e.v}</strong></div>
+                            <div class="escalao-stat"><span>Derrotas</span><strong style="color:var(--loss)">${e.d}</strong></div>
+                            <div class="escalao-stat"><span>Sets</span><strong>${e.sp}:${e.sc}</strong></div>
+                        </div>
+                        <div class="mini-bar">
+                            <div class="mini-bar-fill" style="width: ${taxa}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderiza Lista de Jogos Finalizados com Logos
+        const matchesList = document.getElementById('matchesList');
+        document.getElementById('countMatchesLabel').innerText = `${filtrados.length} ${filtrados.length === 1 ? 'jogo' : 'jogos'}`;
+
+        if (filtrados.length === 0) {
+            matchesList.innerHTML = `<div class="empty-state">Nenhum jogo finalizado encontrado para os filtros selecionados.</div>`;
+            return;
+        }
+
+        matchesList.innerHTML = filtrados.map(j => {
+            const sp = parseInt(j.setPro) || 0;
+            const sc = parseInt(j.setContra) || 0;
+            const isWin = sp > sc;
+            const dt = j.data ? j.data.split('-').reverse().join('/') : '-';
+            const advLogo = getLogoPath(j.adversario);
+            const advInitials = getInitials(j.adversario);
+
+            // Define ordem visual conforme mando de campo (Casa à esquerda, Fora à direita)
+            const isCasa = j.casaFora === 'Casa';
+
+            const academicosHtml = `
+                <div class="team-logo">
+                    <img src="logo.png" alt="FC Os Académicos" onerror="this.onerror=null; this.src='academicos.png';">
+                </div>
+                <span class="team-name">FC Os Académicos</span>
+            `;
+
+            const adversarioHtml = `
+                <div class="team-logo">
+                    <img src="${advLogo}" alt="${j.adversario}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="team-fallback" style="display:none;">${advInitials}</span>
+                </div>
+                <span class="team-name">${j.adversario || 'Adversário'}</span>
+            `;
+
+            const leftTeam = isCasa
+                ? `<div class="team-side home"><span class="team-name">FC Os Académicos</span><div class="team-logo"><img src="logo.png" alt="FC Os Académicos" onerror="this.onerror=null; this.src='academicos.png';"></div></div>`
+                : `<div class="team-side home"><span class="team-name">${j.adversario || 'Adversário'}</span><div class="team-logo"><img src="${advLogo}" alt="${j.adversario}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span class="team-fallback" style="display:none;">${advInitials}</span></div></div>`;
+
+            const rightTeam = isCasa
+                ? `<div class="team-side away">${adversarioHtml}</div>`
+                : `<div class="team-side away">${academicosHtml}</div>`;
+
+            const placarEsquerda = isCasa ? sp : sc;
+            const placarDireita = isCasa ? sc : sp;
+
+            return `
+                <div class="match-card ${isWin ? 'is-win' : 'is-loss'}">
+                    <div class="match-meta">
+                        <span class="match-escalao">${j.escalao || '-'}</span>
+                        <span class="match-comp">${j.competicao || 'Campeonato'}${j.jornada ? ' · J' + j.jornada : ''}</span>
+                        <span class="match-date">📅 ${dt} ${j.hora ? 'às ' + j.hora : ''}</span>
+                    </div>
+
+                    <div class="scoreboard">
+                        ${leftTeam}
+                        <div class="score-box">
+                            <div class="score-numbers">
+                                <span>${placarEsquerda}</span>
+                                <span style="opacity:0.5; font-size:14px;">-</span>
+                                <span>${placarDireita}</span>
+                            </div>
+                            ${j.parciais ? `<div class="score-parciais">${j.parciais}</div>` : ''}
+                        </div>
+                        ${rightTeam}
+                    </div>
+
+                    <div class="match-status">
+                        <span class="result-pill ${isWin ? 'win' : 'loss'}">${isWin ? 'Vitória' : 'Derrota'}</span>
+                        <span class="local-pill">${isCasa ? '🏠 Casa' : '🚌 Fora'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+</script>
+</body>
+</html>
